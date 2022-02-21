@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="questions">
+        <item>
+            Быть или не быть - вот в чем вопрос?
+        </item>
+        <item>
+            Любит ли меня моя жена?
+        </item>
+        <item>
+            Мы рождены для счастья?
+        </item>
+        <item>
+            Все мы родом из Эфиопии?
+        </item>
+        <item>
+            Когда мы ковыряемся в носу, мы - Ольга?
+        </item>
+        <item>
+            Разум когда-нибудь победит?
+        </item>
+        <item>
+            Найдем ли мы наше предназначенье?
+        </item>
+    </string-array>
+</resources>

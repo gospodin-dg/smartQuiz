@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">smartQuiz</string>
+    <string name="question_1">Быть или не быть - вот в чем вопрос?</string>
+    <string name="question_2">Любит ли меня моя жена?</string>
+    <string name="question_3">Мы рождены для счастья?</string>
+    <string name="question_4">Все мы родом из Эфиопии?</string>
+    <string name="question_5">Когда мы ковыряемся в носу, мы - Ольга?</string>
+    <string name="question_6">Разум когда-нибудь победит?</string>
+    <string name="question_7">Найдем ли мы наше предназначенье?</string>
+
+
+    <string name="btn_true">Да</string>
+    <string name="btn_false">Нет</string>
+
+    <string name="true_answer">Это ПРАВИЛЬНЫЙ ответ!!!</string>
+    <string name="false_answer">Увы, Вы ответили НЕ верно!</string>
+
+</resources>
