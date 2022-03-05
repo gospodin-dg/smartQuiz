@@ -14,9 +14,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:text="@string/question_1"
+
         android:textSize="15sp"
-        android:textStyle="bold|italic">
+        android:textStyle="bold|italic"
+        android:gravity="center"
+        tools:text="@string/question_1">
 
     </TextView>
 
@@ -49,6 +51,31 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:background="@color/purple_500"
+            android:src="@drawable/ic_arrow_left"
+            android:contentDescription="@string/btn_previous"/>
+
+        <ImageButton
+            android:id="@+id/btn_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:background="@color/purple_500"
+            android:src="@drawable/ic_arrow_right"
+            android:contentDescription="@string/btn_next"/>
+    </LinearLayout>
 
 
 </LinearLayout>
