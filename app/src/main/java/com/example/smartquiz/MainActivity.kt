@@ -3,9 +3,13 @@ package com.example.smartquiz
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.*
+import androidx.core.view.isVisible
+
+private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,12 +28,16 @@ class MainActivity : AppCompatActivity() {
         Question(R.string.question_5, true),
         Question(R.string.question_6, true)
     )
+    private var trueAnswerCount: Int = 0
+
+
 
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d(TAG, "onCreate")
         init()
     }
 
@@ -39,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         btnFalse = findViewById(R.id.btn_false)
         btnNext = findViewById(R.id.btn_next)
         btnPrevious = findViewById(R.id.btn_previous)
+        btnPrevious.isVisible = false
         questionText.setText(bankQuestion[currentQuestion].questionText)
 
         btnTrue.setOnClickListener{view: View ->
@@ -75,26 +84,80 @@ class MainActivity : AppCompatActivity() {
     private fun nextQuestion(){
         if (currentQuestion < (bankQuestion.size-1)){
             currentQuestion = currentQuestion + 1
-        } else {
-            currentQuestion = 0
+            btnPrevious.isVisible = true
         }
+        if(currentQuestion == (bankQuestion.size-1)){
+            btnNext.isVisible = false
+        }
+        unlockButtons()
+
     }
 
     private fun previousQuestion(){
         if (currentQuestion > 0){
             currentQuestion = currentQuestion - 1
-        } else {
-            currentQuestion = bankQuestion.size - 1
+            btnNext.isVisible = true
         }
+        if(currentQuestion == 0){
+            btnPrevious.isVisible = false
+        }
+        unlockButtons()
     }
 
     private fun checkAnswer(userAnswer: Boolean ){
         val trueAnswerQuestion = bankQuestion[currentQuestion].trueAnswer
         if (userAnswer == trueAnswerQuestion){
+            trueAnswerCount += 1
             Toast.makeText(this, R.string.true_answer, Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, R.string.false_answer, Toast.LENGTH_SHORT).show()
         }
+        lockButtons()
+        if (currentQuestion == (bankQuestion.size-1)){
+            var percentTrueAnswers: Float = trueAnswerCount / bankQuestion.size.toFloat() *100
+            Toast.makeText(this, "Тест закончен. Процент правильных ответов - $percentTrueAnswers%", Toast.LENGTH_LONG).show()
+            trueAnswerCount = 0
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG, "onRestart")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy")
+    }
+
+    fun lockButtons() {
+        btnTrue.isEnabled = false
+        btnFalse.isEnabled = false
+    }
+
+    fun unlockButtons(){
+        btnTrue.isEnabled = true
+        btnFalse.isEnabled = true
     }
 
 }
