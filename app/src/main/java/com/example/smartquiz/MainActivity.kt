@@ -1,13 +1,13 @@
 package com.example.smartquiz
 
-import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.widget.*
 import androidx.core.view.isVisible
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 
 private const val TAG = "MainActivity"
 
@@ -30,15 +30,14 @@ class MainActivity : AppCompatActivity() {
     )
     private var trueAnswerCount: Int = 0
 
-
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d(TAG, "onCreate")
         init()
+        val provider: ViewModelProvider = ViewModelProviders.of(this)
+        val questionViewModel: QuestionViewModel = provider.get(QuestionViewModel::class.java)
+        Log.d(TAG, "Got a QuizViewModel: $questionViewModel")
     }
 
     fun init() {
@@ -90,7 +89,6 @@ class MainActivity : AppCompatActivity() {
             btnNext.isVisible = false
         }
         unlockButtons()
-
     }
 
     private fun previousQuestion(){
