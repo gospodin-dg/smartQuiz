@@ -18,26 +18,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnFalse: Button
     private lateinit var btnNext: ImageButton
     private lateinit var btnPrevious: ImageButton
-    private var currentQuestion: Int = 0
-    private val bankQuestion = listOf<Question>(
-        Question(R.string.question_0, true),
-        Question(R.string.question_1, true),
-        Question(R.string.question_2, true),
-        Question(R.string.question_3, false),
-        Question(R.string.question_4, true),
-        Question(R.string.question_5, true),
-        Question(R.string.question_6, true)
-    )
     private var trueAnswerCount: Int = 0
+
+    private val questionViewModel: QuestionViewModel by lazy {
+        ViewModelProviders.of(this).get(QuestionViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d(TAG, "onCreate")
         init()
-        val provider: ViewModelProvider = ViewModelProviders.of(this)
-        val questionViewModel: QuestionViewModel = provider.get(QuestionViewModel::class.java)
-        Log.d(TAG, "Got a QuizViewModel: $questionViewModel")
     }
 
     fun init() {
@@ -47,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         btnNext = findViewById(R.id.btn_next)
         btnPrevious = findViewById(R.id.btn_previous)
         btnPrevious.isVisible = false
-        questionText.setText(bankQuestion[currentQuestion].questionText)
+        updateQuestion()
 
         btnTrue.setOnClickListener{view: View ->
            checkAnswer(true)
@@ -57,66 +47,69 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnNext.setOnClickListener{view: View ->
-            updateQuestion(view)
+            questionViewModel.nextQuestion()
+            updateQuestion()
         }
 
         btnPrevious.setOnClickListener{view: View ->
-            updateQuestion(view)
+            questionViewModel.previousQuestion()
+            updateQuestion()
         }
 
         questionText.setOnClickListener{view: View ->
-            updateQuestion(view)
+            questionViewModel.nextQuestion()
+            updateQuestion()
         }
     }
 
-    private fun updateQuestion(view: View) {
-        val view_id = view.id
-        when(view_id){
-            R.id.question_text -> nextQuestion()
-            R.id.btn_next -> nextQuestion()
-            R.id.btn_previous -> previousQuestion()
-        }
-        //currentQuestion = (currentQuestion + 1) % bankQuestion.size
-        questionText.setText(bankQuestion[currentQuestion].questionText)
-    }
-
-    private fun nextQuestion(){
-        if (currentQuestion < (bankQuestion.size-1)){
-            currentQuestion = currentQuestion + 1
-            btnPrevious.isVisible = true
-        }
-        if(currentQuestion == (bankQuestion.size-1)){
-            btnNext.isVisible = false
-        }
+    private fun updateQuestion() {
         unlockButtons()
-    }
-
-    private fun previousQuestion(){
-        if (currentQuestion > 0){
-            currentQuestion = currentQuestion - 1
-            btnNext.isVisible = true
-        }
-        if(currentQuestion == 0){
-            btnPrevious.isVisible = false
-        }
-        unlockButtons()
+        val currentQuestionText = questionViewModel.currentQuestionText
+        questionText.setText(currentQuestionText)
+        btnNext.isVisible = questionViewModel.currentQuestion < (questionViewModel.bankQuestionSize-1)
+        btnPrevious.isVisible = questionViewModel.currentQuestion > 0
     }
 
     private fun checkAnswer(userAnswer: Boolean ){
-        val trueAnswerQuestion = bankQuestion[currentQuestion].trueAnswer
+        lockButtons()
+        val trueAnswerQuestion = questionViewModel.currentQuestionTrueAnswer
+
+
+
         if (userAnswer == trueAnswerQuestion){
             trueAnswerCount += 1
             Toast.makeText(this, R.string.true_answer, Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, R.string.false_answer, Toast.LENGTH_SHORT).show()
         }
-        lockButtons()
-        if (currentQuestion == (bankQuestion.size-1)){
-            var percentTrueAnswers: Float = trueAnswerCount / bankQuestion.size.toFloat() *100
-            Toast.makeText(this, "Тест закончен. Процент правильных ответов - $percentTrueAnswers%", Toast.LENGTH_LONG).show()
-            trueAnswerCount = 0
+        if (questionViewModel.currentQuestion == (questionViewModel.bankQuestionSize-1)){
+            showQuizResults()
         }
     }
+
+    private fun showQuizResults() {
+        var percentTrueAnswers: Float = (trueAnswerCount / questionViewModel.bankQuestionSize.toFloat()) * 100
+        Toast.makeText(this, "Тест закончен. Процент правильных ответов - $percentTrueAnswers%", Toast.LENGTH_LONG).show()
+        trueAnswerCount = 0
+        questionViewModel.currentQuestion = 0
+    }
+
+    private fun lockButtons() {
+        btnTrue.isEnabled = false
+        btnFalse.isEnabled = false
+    }
+
+    private fun unlockButtons(){
+        btnTrue.isEnabled = true
+        btnFalse.isEnabled = true
+    }
+
+
+
+
+
+
+
 
     override fun onStart() {
         super.onStart()
@@ -146,16 +139,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
-    }
-
-    fun lockButtons() {
-        btnTrue.isEnabled = false
-        btnFalse.isEnabled = false
-    }
-
-    fun unlockButtons(){
-        btnTrue.isEnabled = true
-        btnFalse.isEnabled = true
     }
 
 }
