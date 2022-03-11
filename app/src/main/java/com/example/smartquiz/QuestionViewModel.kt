@@ -4,11 +4,9 @@ import android.util.Log
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 
-private const val TAG: String = "QuestionViewModel"
-
 class QuestionViewModel: ViewModel() {
 
-    private val bankQuestion = listOf<Question>(
+    private val bankQuestion = listOf(
         Question(R.string.question_0, true, null),
         Question(R.string.question_1, true, null),
         Question(R.string.question_2, true, null),
@@ -19,6 +17,7 @@ class QuestionViewModel: ViewModel() {
     )
 
     var currentQuestion: Int = 0
+    var trueAnswerCount: Int = 0
 
     val currentQuestionTrueAnswer: Boolean
         get() = bankQuestion[currentQuestion].trueAnswer
@@ -34,7 +33,7 @@ class QuestionViewModel: ViewModel() {
 
     fun nextQuestion(){
         if (currentQuestion < (bankQuestion.size-1)){
-            currentQuestion = currentQuestion + 1
+            currentQuestion += 1
         }
     }
 
@@ -46,6 +45,12 @@ class QuestionViewModel: ViewModel() {
 
     fun isCheckedAnswer(flag: Boolean){
         bankQuestion[currentQuestion].isAnswered = flag
+    }
+
+    fun isAnsweredNullable(){
+        for (question in bankQuestion) {
+            question.isAnswered = null
+        }
     }
 
 }

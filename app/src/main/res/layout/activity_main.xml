@@ -75,6 +75,31 @@
             android:background="@color/purple_500"
             android:src="@drawable/ic_arrow_right"
             android:contentDescription="@string/btn_next"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_finish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_finish"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btn_new_quiz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/btn_new_quiz"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
     </LinearLayout>
 
 

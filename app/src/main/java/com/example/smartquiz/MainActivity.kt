@@ -10,15 +10,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 
 private const val TAG = "MainActivity"
+private const val KEY_QUESTION_INDEX = "index_question"
+private const val KEY_TRUE_ANSWERS = "true_answers"
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var questionText: TextView
     private lateinit var btnTrue: Button
     private lateinit var btnFalse: Button
+    private lateinit var btnFinish: Button
+    private lateinit var btnNewQuiz: Button
+
     private lateinit var btnNext: ImageButton
     private lateinit var btnPrevious: ImageButton
-    private var trueAnswerCount: Int = 0
+
 
     private val questionViewModel: QuestionViewModel by lazy {
         ViewModelProviders.of(this).get(QuestionViewModel::class.java)
@@ -27,6 +32,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d(TAG, "onCreate(Bundle?) called")
+        val currentQuestion = savedInstanceState?.getInt(KEY_QUESTION_INDEX, 0) ?: 0
+        questionViewModel.currentQuestion = currentQuestion
+        val currentTrueAnswers = savedInstanceState?.getInt(KEY_TRUE_ANSWERS, 0) ?: 0
+        questionViewModel.trueAnswerCount = currentTrueAnswers
         init()
     }
 
@@ -36,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         btnFalse = findViewById(R.id.btn_false)
         btnNext = findViewById(R.id.btn_next)
         btnPrevious = findViewById(R.id.btn_previous)
+        btnFinish = findViewById(R.id.btn_finish)
+        btnNewQuiz = findViewById(R.id.btn_new_quiz)
         btnPrevious.isVisible = false
         updateQuestion()
 
@@ -60,56 +72,89 @@ class MainActivity : AppCompatActivity() {
             questionViewModel.nextQuestion()
             updateQuestion()
         }
+
+        btnFinish.setOnClickListener{view: View ->
+            showQuizResults()
+            lockButtonsMove()
+        }
+
+        btnNewQuiz.setOnClickListener{view: View ->
+            startNewQuiz()
+            updateQuestion()
+            unlockButtonsMove()
+        }
+
     }
 
     private fun updateQuestion() {
-        unlockButtons()
-        val currentQuestionText = questionViewModel.currentQuestionText
-        questionText.setText(currentQuestionText)
+        checkingDoubleAnswer()
         btnNext.isVisible = questionViewModel.currentQuestion < (questionViewModel.bankQuestionSize-1)
         btnPrevious.isVisible = questionViewModel.currentQuestion > 0
+        val currentQuestionText = questionViewModel.currentQuestionText
+        questionText.setText(currentQuestionText)
+
     }
 
     private fun checkAnswer(userAnswer: Boolean ){
-        lockButtons()
+        lockButtonsAnswer()
         val trueAnswerQuestion = questionViewModel.currentQuestionTrueAnswer
-
-
-
-        if (userAnswer == trueAnswerQuestion){
-            trueAnswerCount += 1
+        if (userAnswer == trueAnswerQuestion && questionViewModel.isAnswered == null ){
+            questionViewModel.trueAnswerCount += 1
+            questionViewModel.isCheckedAnswer(true)
             Toast.makeText(this, R.string.true_answer, Toast.LENGTH_SHORT).show()
         } else {
+            questionViewModel.isCheckedAnswer(false)
             Toast.makeText(this, R.string.false_answer, Toast.LENGTH_SHORT).show()
-        }
-        if (questionViewModel.currentQuestion == (questionViewModel.bankQuestionSize-1)){
-            showQuizResults()
         }
     }
 
     private fun showQuizResults() {
-        var percentTrueAnswers: Float = (trueAnswerCount / questionViewModel.bankQuestionSize.toFloat()) * 100
+        var percentTrueAnswers: Float = (questionViewModel.trueAnswerCount / questionViewModel.bankQuestionSize.toFloat()) * 100
         Toast.makeText(this, "Тест закончен. Процент правильных ответов - $percentTrueAnswers%", Toast.LENGTH_LONG).show()
-        trueAnswerCount = 0
-        questionViewModel.currentQuestion = 0
+        questionViewModel.trueAnswerCount = 0
     }
 
-    private fun lockButtons() {
+    private fun lockButtonsAnswer() {
         btnTrue.isEnabled = false
         btnFalse.isEnabled = false
     }
 
-    private fun unlockButtons(){
+    private fun unlockButtonsAnswer(){
         btnTrue.isEnabled = true
         btnFalse.isEnabled = true
     }
 
+    private fun checkingDoubleAnswer(){
+        if(questionViewModel.isAnswered != null) {
+            lockButtonsAnswer()
+        } else {
+            unlockButtonsAnswer()
+        }
+    }
 
+    private fun startNewQuiz(){
+        questionViewModel.currentQuestion = 0
+        questionViewModel.isAnsweredNullable()
+    }
 
+    private fun lockButtonsMove(){
+        btnNext.isVisible = false
+        btnPrevious.isVisible = false
+        questionText.isEnabled = false
+        btnFinish.isEnabled = false
+    }
 
+    private fun unlockButtonsMove(){
+        questionText.isEnabled = true
+        btnFinish.isEnabled = true
+    }
 
-
-
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        Log.d(TAG, "onSaveInstanceState")
+        savedInstanceState.putInt(KEY_QUESTION_INDEX, questionViewModel.currentQuestion)
+        savedInstanceState.putInt(KEY_TRUE_ANSWERS, questionViewModel.trueAnswerCount)
+    }
 
     override fun onStart() {
         super.onStart()

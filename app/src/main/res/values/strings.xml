@@ -13,8 +13,11 @@
     <string name="btn_false">Нет</string>
     <string name="btn_next">Следующий вопрос</string>
     <string name="btn_previous">Предыдущий вопрос</string>
+    <string name="btn_new_quiz">Новая игра</string>
+    <string name="btn_finish">Завершить</string>
 
     <string name="true_answer">Это ПРАВИЛЬНЫЙ ответ!!!</string>
     <string name="false_answer">Увы, Вы ответили НЕ верно!</string>
+
 
 </resources>
