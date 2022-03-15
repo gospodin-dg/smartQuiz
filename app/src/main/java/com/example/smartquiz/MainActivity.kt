@@ -1,5 +1,9 @@
 package com.example.smartquiz
 
+import android.app.Activity
+import android.content.ClipData.newIntent
+import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -9,9 +13,14 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 
+
+
 private const val TAG = "MainActivity"
-private const val KEY_QUESTION_INDEX = "index_question"
-private const val KEY_TRUE_ANSWERS = "true_answers"
+private const val KEY_QUESTION_INDEX = "com.example.smartquiz.index_question"
+private const val KEY_TRUE_ANSWERS = "com.example.smartquiz.true_answers"
+private const val KEY_CHEAT_COUNT = "com.example.smartquiz.cheat_count"
+private const val CODE_REQUEST_FOR_CHEAT_ACTIVITY = 100
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,10 +29,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnFalse: Button
     private lateinit var btnFinish: Button
     private lateinit var btnNewQuiz: Button
+    private lateinit var btnShowAnswer: Button
 
     private lateinit var btnNext: ImageButton
     private lateinit var btnPrevious: ImageButton
-
 
     private val questionViewModel: QuestionViewModel by lazy {
         ViewModelProviders.of(this).get(QuestionViewModel::class.java)
@@ -37,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         questionViewModel.currentQuestion = currentQuestion
         val currentTrueAnswers = savedInstanceState?.getInt(KEY_TRUE_ANSWERS, 0) ?: 0
         questionViewModel.trueAnswerCount = currentTrueAnswers
+        val currentCheatCount = savedInstanceState?.getInt(KEY_CHEAT_COUNT, 0) ?: 0
+        questionViewModel.isCheatingCount = currentCheatCount
         init()
     }
 
@@ -48,40 +59,45 @@ class MainActivity : AppCompatActivity() {
         btnPrevious = findViewById(R.id.btn_previous)
         btnFinish = findViewById(R.id.btn_finish)
         btnNewQuiz = findViewById(R.id.btn_new_quiz)
+        btnShowAnswer = findViewById(R.id.btn_show_answer)
         btnPrevious.isVisible = false
         updateQuestion()
 
-        btnTrue.setOnClickListener{view: View ->
+        btnTrue.setOnClickListener{
            checkAnswer(true)
         }
-        btnFalse.setOnClickListener{view: View ->
+        btnFalse.setOnClickListener{
             checkAnswer(false)
         }
 
-        btnNext.setOnClickListener{view: View ->
+        btnNext.setOnClickListener{
             questionViewModel.nextQuestion()
             updateQuestion()
         }
 
-        btnPrevious.setOnClickListener{view: View ->
+        btnPrevious.setOnClickListener{
             questionViewModel.previousQuestion()
             updateQuestion()
         }
 
-        questionText.setOnClickListener{view: View ->
+        questionText.setOnClickListener{
             questionViewModel.nextQuestion()
             updateQuestion()
         }
 
-        btnFinish.setOnClickListener{view: View ->
+        btnFinish.setOnClickListener{
             showQuizResults()
             lockButtonsMove()
         }
 
-        btnNewQuiz.setOnClickListener{view: View ->
+        btnNewQuiz.setOnClickListener{
             startNewQuiz()
             updateQuestion()
             unlockButtonsMove()
+        }
+
+        btnShowAnswer.setOnClickListener{
+            newIntentForCheatActivity()
         }
 
     }
@@ -98,18 +114,26 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(userAnswer: Boolean ){
         lockButtonsAnswer()
         val trueAnswerQuestion = questionViewModel.currentQuestionTrueAnswer
+        var answer_result = 0
         if (userAnswer == trueAnswerQuestion && questionViewModel.isAnswered == null ){
             questionViewModel.trueAnswerCount += 1
             questionViewModel.isCheckedAnswer(true)
-            Toast.makeText(this, R.string.true_answer, Toast.LENGTH_SHORT).show()
+            answer_result = R.string.true_answer
         } else {
             questionViewModel.isCheckedAnswer(false)
-            Toast.makeText(this, R.string.false_answer, Toast.LENGTH_SHORT).show()
+            answer_result = R.string.false_answer
         }
+        if (questionViewModel.isCheating) {
+            answer_result = R.string.reprimand_toast
+        }
+        Toast.makeText(this, answer_result, Toast.LENGTH_SHORT).show()
     }
 
     private fun showQuizResults() {
         var percentTrueAnswers: Float = (questionViewModel.trueAnswerCount / questionViewModel.bankQuestionSize.toFloat()) * 100
+        if(questionViewModel.isCheatingCount > 0){
+            Toast.makeText(this, "Вы - ЖУЛИК и подсмотрели ответ ${questionViewModel.isCheatingCount} раз(а)", Toast.LENGTH_LONG).show()
+        }
         Toast.makeText(this, "Тест закончен. Процент правильных ответов - $percentTrueAnswers%", Toast.LENGTH_LONG).show()
         questionViewModel.trueAnswerCount = 0
     }
@@ -135,6 +159,9 @@ class MainActivity : AppCompatActivity() {
     private fun startNewQuiz(){
         questionViewModel.currentQuestion = 0
         questionViewModel.isAnsweredNullable()
+        questionViewModel.isCheatingDelete()
+        questionViewModel.isCheater = false
+        questionViewModel.isCheatingCount = 0
     }
 
     private fun lockButtonsMove(){
@@ -151,41 +178,28 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        Log.d(TAG, "onSaveInstanceState")
         savedInstanceState.putInt(KEY_QUESTION_INDEX, questionViewModel.currentQuestion)
         savedInstanceState.putInt(KEY_TRUE_ANSWERS, questionViewModel.trueAnswerCount)
+        savedInstanceState.putInt(KEY_CHEAT_COUNT, questionViewModel.isCheatingCount)
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "onStart")
+    private fun newIntentForCheatActivity(){
+        val currentQuestionTrueAnswer = questionViewModel.currentQuestionTrueAnswer
+        val intent = CheatActivity.newIntent(this, currentQuestionTrueAnswer)
+        startActivityForResult(intent, CODE_REQUEST_FOR_CHEAT_ACTIVITY)
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "onResume")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+        if (requestCode == CODE_REQUEST_FOR_CHEAT_ACTIVITY) {
+            questionViewModel.isCheater = data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
+            questionViewModel.isCheatingCount += 1
+            questionViewModel.isCheating(questionViewModel.isCheater)
+        }
     }
-
-    override fun onRestart() {
-        super.onRestart()
-        Log.d(TAG, "onRestart")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "onStop")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG, "onDestroy")
-    }
-
 }
 
 

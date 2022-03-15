@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="questions">
+    <!--<string-array name="questions">
         <item>
             Быть или не быть - вот в чем вопрос?
         </item>
@@ -22,5 +22,5 @@
         <item>
             Найдем ли мы наше предназначенье?
         </item>
-    </string-array>
+    </string-array>-->
 </resources>

@@ -20,4 +20,14 @@
     <string name="false_answer">Увы, Вы ответили НЕ верно!</string>
 
 
+    <string name="answer_yes">Правильный ответ - ДА!</string>
+    <string name="answer_no">Правильный ответ - НЕТ!</string>
+
+
+
+    <string name="warning_message">Вы точно хотите подсмотреть ответ?</string>
+    <string name="btn_show_answer">Узнать ответ</string>
+    <string name="btn_cheat">Жульничество!</string>
+    <string name="reprimand_toast">Подсматривать ответ ПЛОХО!</string>
+
 </resources>

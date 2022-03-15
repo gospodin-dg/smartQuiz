@@ -18,6 +18,8 @@ class QuestionViewModel: ViewModel() {
 
     var currentQuestion: Int = 0
     var trueAnswerCount: Int = 0
+    var isCheater: Boolean = false
+    var isCheatingCount: Int = 0
 
     val currentQuestionTrueAnswer: Boolean
         get() = bankQuestion[currentQuestion].trueAnswer
@@ -30,6 +32,9 @@ class QuestionViewModel: ViewModel() {
 
     val isAnswered: Boolean?
         get() = bankQuestion[currentQuestion].isAnswered
+
+    val isCheating: Boolean
+        get() = bankQuestion[currentQuestion].isCheating
 
     fun nextQuestion(){
         if (currentQuestion < (bankQuestion.size-1)){
@@ -47,9 +52,19 @@ class QuestionViewModel: ViewModel() {
         bankQuestion[currentQuestion].isAnswered = flag
     }
 
+    fun isCheating(flag: Boolean){
+        bankQuestion[currentQuestion].isCheating = flag
+    }
+
     fun isAnsweredNullable(){
         for (question in bankQuestion) {
             question.isAnswered = null
+        }
+    }
+
+    fun isCheatingDelete(){
+        for (question in bankQuestion) {
+            question.isCheating = false
         }
     }
 

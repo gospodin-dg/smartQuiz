@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="70dp">
+        android:layout_marginTop="45dp">
 
         <Button
             android:id="@+id/btn_true"
@@ -50,7 +50,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
+        android:layout_marginBottom="50dp"
         android:layout_gravity="center_horizontal|center_vertical">
 
         <ImageButton
@@ -81,7 +81,7 @@
 
         <Button
             android:id="@+id/btn_finish"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_finish"
             android:textAllCaps="false"
@@ -89,12 +89,22 @@
 
         <Button
             android:id="@+id/btn_new_quiz"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/btn_new_quiz"
             android:textAllCaps="false"
             android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btn_show_answer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_cheat"
+            android:textAllCaps="false"
+            android:layout_marginTop="5dp"
+            android:textSize="12sp" />
+
     </LinearLayout>
 
 </FrameLayout>
