@@ -1,8 +1,10 @@
 package com.example.smartquiz
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -21,6 +23,7 @@ class CheatActivity : AppCompatActivity() {
     private lateinit var btnShowAnswer: Button
     private lateinit var txtViewShowAnswer: TextView
     private var isCheatingState: Boolean = false
+    private lateinit var txtViewApiLevel: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,11 +33,15 @@ class CheatActivity : AppCompatActivity() {
         init(savedInstanceState)
     }
 
+    @SuppressLint("RestrictedApi")
     fun init(savedInstanceState: Bundle?) {
         isCheatingState = savedInstanceState?.getBoolean(KEY_CHEATING_STATE, false) ?: false
         trueAnswer = intent.getBooleanExtra(ANSWER_IS_TRUE, false)
         btnShowAnswer = findViewById(R.id.btn_show_answer)
         txtViewShowAnswer = findViewById(R.id.text_answer)
+        txtViewApiLevel = findViewById(R.id.api_level_device)
+        val apiLevelDevice: String = Build.VERSION.SDK_INT.toString()
+        txtViewApiLevel.setText("API Level $apiLevelDevice")
         if (isCheatingState) {
             showAnswer()
         }

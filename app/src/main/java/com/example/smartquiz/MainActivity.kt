@@ -1,16 +1,12 @@
 package com.example.smartquiz
 
 import android.app.Activity
-import android.content.ClipData.newIntent
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.*
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 
 
@@ -20,11 +16,14 @@ private const val KEY_QUESTION_INDEX = "com.example.smartquiz.index_question"
 private const val KEY_TRUE_ANSWERS = "com.example.smartquiz.true_answers"
 private const val KEY_CHEAT_COUNT = "com.example.smartquiz.cheat_count"
 private const val CODE_REQUEST_FOR_CHEAT_ACTIVITY = 100
+private const val MAX_SIZE_CHEAT_REMAINS = 3
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var questionText: TextView
+    private lateinit var attemptCountCheatText: TextView
+
     private lateinit var btnTrue: Button
     private lateinit var btnFalse: Button
     private lateinit var btnFinish: Button
@@ -51,8 +50,9 @@ class MainActivity : AppCompatActivity() {
         init()
     }
 
-    fun init() {
+    private fun init() {
         questionText = findViewById(R.id.question_text)
+        attemptCountCheatText = findViewById(R.id.attempt_count)
         btnTrue = findViewById(R.id.btn_true)
         btnFalse = findViewById(R.id.btn_false)
         btnNext = findViewById(R.id.btn_next)
@@ -104,6 +104,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateQuestion() {
         checkingDoubleAnswer()
+        checkAttemptCheatCount()
         btnNext.isVisible = questionViewModel.currentQuestion < (questionViewModel.bankQuestionSize-1)
         btnPrevious.isVisible = questionViewModel.currentQuestion > 0
         val currentQuestionText = questionViewModel.currentQuestionText
@@ -114,7 +115,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(userAnswer: Boolean ){
         lockButtonsAnswer()
         val trueAnswerQuestion = questionViewModel.currentQuestionTrueAnswer
-        var answer_result = 0
+        var answer_result: Int
         if (userAnswer == trueAnswerQuestion && questionViewModel.isAnswered == null ){
             questionViewModel.trueAnswerCount += 1
             questionViewModel.isCheckedAnswer(true)
@@ -129,8 +130,15 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, answer_result, Toast.LENGTH_SHORT).show()
     }
 
+    private fun checkAttemptCheatCount(){
+        val currentCountAttemptCheat = questionViewModel.isCheatingCount
+        val attemptCheatRemains = MAX_SIZE_CHEAT_REMAINS - currentCountAttemptCheat
+        attemptCountCheatText.text = "Осталось $attemptCheatRemains раз(а)!"
+        btnShowAnswer.isEnabled = attemptCheatRemains > 0
+    }
+
     private fun showQuizResults() {
-        var percentTrueAnswers: Float = (questionViewModel.trueAnswerCount / questionViewModel.bankQuestionSize.toFloat()) * 100
+        val percentTrueAnswers: Float = (questionViewModel.trueAnswerCount / questionViewModel.bankQuestionSize.toFloat()) * 100
         if(questionViewModel.isCheatingCount > 0){
             Toast.makeText(this, "Вы - ЖУЛИК и подсмотрели ответ ${questionViewModel.isCheatingCount} раз(а)", Toast.LENGTH_LONG).show()
         }
@@ -198,8 +206,35 @@ class MainActivity : AppCompatActivity() {
             questionViewModel.isCheater = data?.getBooleanExtra(EXTRA_ANSWER_SHOWN, false) ?: false
             questionViewModel.isCheatingCount += 1
             questionViewModel.isCheating(questionViewModel.isCheater)
+            checkAttemptCheatCount()
         }
     }
+
+    /*override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart started")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume started")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause started")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop started")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy started")
+    }*/
+
 }
 
 
